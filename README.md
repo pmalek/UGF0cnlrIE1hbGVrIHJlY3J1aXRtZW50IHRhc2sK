@@ -1,4 +1,4 @@
-# gogoapp
+# gogoapp / UGF0cnlrIE1hbGVrIHJlY3J1aXRtZW50IHRhc2sK
 
 ## How to run
 
@@ -119,4 +119,3 @@ Environment variables can be tweaked in the `.env` file.
     city manner. This could be improved by storing a city to city ID mapping in
     some sort of key, value store but that would make the application more complex
     (should it though?)
-
