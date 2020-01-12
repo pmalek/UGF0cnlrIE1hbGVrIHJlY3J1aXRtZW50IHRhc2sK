@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+
+  app:
+    container_name: app
+    build: .
+    image: app:0.1
+    ports:
+      - "$PORT:$PORT"
+    environment:
+      - PORT
+      - REDIS_ADDRESS
+      - REDIS_TTL
+      - OPENWEATHER_API_KEY
+    depends_on: 
+      - redis
+
+  redis:
+    container_name: redis
+    image: redis:5-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-volume:/data
+
+volumes: 
+  redis-volume:

@@ -1,52 +1,46 @@
 package main
 
 import (
-	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
+	"github.com/pmalek/UGF0cnlrIE1hbGVrIHJlY3J1aXRtZW50IHRhc2sK/app"
+	"github.com/pmalek/UGF0cnlrIE1hbGVrIHJlY3J1aXRtZW50IHRhc2sK/flags"
+	"github.com/pmalek/UGF0cnlrIE1hbGVrIHJlY3J1aXRtZW50IHRhc2sK/weather"
+
 	log "github.com/sirupsen/logrus"
-)
-
-const (
-	OpenWeatherApiBaseURL = "https://api.openweathermap.org/data/2.5/"
+	"github.com/urfave/cli/v2"
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
+	app := &cli.App{
+		Name: "app",
+		Flags: []cli.Flag{
+			flags.FlagOpenweatherAPIKey,
+			flags.FlagPort,
+			flags.FlagRedisAddress,
+			flags.FlagRedisTTL,
+		},
+		Action: func(c *cli.Context) error {
+			weatherAPI := weather.NewOpenWeatherAPI(flags.OpenWeatherAPIKey, httpClient())
+
+			return app.Run(app.Config{
+				Port:         flags.Port,
+				RedisAddress: flags.RedisAddress,
+				WeatherAPI:   weatherAPI,
+				CacheTTL:     flags.RedisTTL,
+			})
+		},
 	}
-	log.Infof("Successfully read .env file")
 
-	APIKey := os.Getenv("OPENWEATHER_API_KEY")
+	if err := app.Run(os.Args); err != nil {
+		log.WithError(err).Fatal("Failed to run the app")
+	}
+}
 
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-
-		url := OpenWeatherApiBaseURL + `weather?q=London&appid=` + APIKey
-		resp, err := http.Get(url)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "failed to reach external API",
-			})
-			return
-		}
-		defer resp.Body.Close()
-
-		data, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "failed to read from external API's response",
-			})
-			return
-		}
-
-		c.JSON(200, gin.H{
-			"data": string(data),
-		})
-	})
-
-	r.Run("localhost:8080")
+func httpClient() *http.Client {
+	return &http.Client{
+		Timeout: 30 * time.Second,
+	}
 }
