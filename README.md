@@ -1,4 +1,8 @@
-# gogoapp / UGF0cnlrIE1hbGVrIHJlY3J1aXRtZW50IHRhc2sK
+# sample-go-redis-backend
+
+## Description
+
+This is a simple Golang backend which forwards weather inquiries to OpenWeather API and uses Redis as caching layer.
 
 ## How to run
 
